@@ -43,7 +43,7 @@ Custom ZMK firmware configuration for the [GEIST Totem](https://github.com/GEIGE
 2. Use the `totem_right-xiao_ble-zmk.uf2` file
 
 ### Troubleshooting
-If you encounter any issues, flash the settings reset firmware first, then flash the normal firmware again.
+If you encounter any issues, flash `settings_reset-xiao_ble-zmk.uf2` to both halves first, then flash the normal firmware again.
 
 ## ZMK Studio
 
