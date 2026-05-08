@@ -3,10 +3,12 @@
 // https://github.com/manna-harbour/miryoku_zmk for modern ZMK
 // (Zephyr 4.1, xiao_ble//zmk).
 //
-// Cross-platform: defaults to Windows/Linux clipboard (Ctrl-based). Toggle
-// the Mac flag layer with `&tog U_MAC` (placed on the Media layer) to swap
-// the Cut/Copy/Paste/Undo/Redo bindings to Cmd-based via overlay layers
-// triggered by zmk,conditional-layers.
+// Cross-platform: defaults to macOS (Cmd-based clipboard, GUI on home-row
+// pinky / CTRL on middle finger). Toggle the Win flag layer with
+// `&tog U_WIN` (placed on the Media layer) to swap to Windows/Linux mode:
+// the Cut/Copy/Paste/Undo/Redo bindings become Ctrl-based and the
+// home-row pinky/middle mods swap (CTRL on pinky, GUI on middle), via
+// overlay layers triggered by zmk,conditional-layers.
 //
 
 #include <behaviors.dtsi>
@@ -26,12 +28,12 @@
 #define U_NUM        7
 #define U_SYM        8
 #define U_FUN        9
-#define U_MAC        10
-#define U_BUTTON_MAC 11
-#define U_NAV_MAC    12
-#define U_MOUSE_MAC  13
+#define U_WIN        10
+#define U_BUTTON_WIN 11
+#define U_NAV_WIN    12
+#define U_MOUSE_WIN  13
 
-#define U_TAPPING_TERM 200
+#define U_TAPPING_TERM 300
 
 #define U_NP &none
 #define U_NA &none
@@ -59,19 +61,19 @@
 
 #define U_BOOT &bootloader
 
-// Default (Windows/Linux) clipboard, used by the Button/Nav/Mouse layers.
-#define U_RDO &kp LC(Y)
-#define U_PST &kp LC(V)
-#define U_CPY &kp LC(C)
-#define U_CUT &kp LC(X)
-#define U_UND &kp LC(Z)
+// Default (macOS) clipboard, used by the Button/Nav/Mouse layers.
+#define U_RDO &kp LS(LG(Z))
+#define U_PST &kp LG(V)
+#define U_CPY &kp LG(C)
+#define U_CUT &kp LG(X)
+#define U_UND &kp LG(Z)
 
-// Mac clipboard, used by the *_mac overlay layers (Cmd-based).
-#define M_RDO &kp LS(LG(Z))
-#define M_PST &kp LG(V)
-#define M_CPY &kp LG(C)
-#define M_CUT &kp LG(X)
-#define M_UND &kp LG(Z)
+// Windows/Linux clipboard, used by the *_win overlay layers (Ctrl-based).
+#define W_RDO &kp LC(Y)
+#define W_PST &kp LC(V)
+#define W_CPY &kp LC(C)
+#define W_CUT &kp LC(X)
+#define W_UND &kp LC(Z)
 
 &mmv {
     acceleration-exponent = <1>;
@@ -131,9 +133,9 @@
 
     conditional_layers {
         compatible = "zmk,conditional-layers";
-        button_mac { if-layers = <U_MAC U_BUTTON>; then-layer = <U_BUTTON_MAC>; };
-        nav_mac    { if-layers = <U_MAC U_NAV>;    then-layer = <U_NAV_MAC>; };
-        mouse_mac  { if-layers = <U_MAC U_MOUSE>;  then-layer = <U_MOUSE_MAC>; };
+        button_win { if-layers = <U_WIN U_BUTTON>; then-layer = <U_BUTTON_WIN>; };
+        nav_win    { if-layers = <U_WIN U_NAV>;    then-layer = <U_NAV_WIN>; };
+        mouse_win  { if-layers = <U_WIN U_MOUSE>;  then-layer = <U_MOUSE_WIN>; };
     };
 
     keymap {
@@ -209,7 +211,7 @@ U_BOOT               U_NA               &kp RALT           &u_to_U_SYM        &u
         media {
             display-name = "Media";
             bindings = <
-U_BOOT               &u_to_U_TAP        &u_to_U_EXTRA      &u_to_U_BASE       U_NA                 &studio_unlock       &tog U_MAC         U_RGB_HUI          U_RGB_SAI          U_RGB_BRI
+U_BOOT               &u_to_U_TAP        &u_to_U_EXTRA      &u_to_U_BASE       U_NA                 &studio_unlock       &tog U_WIN         U_RGB_HUI          U_RGB_SAI          U_RGB_BRI
 &kp LGUI             &kp LALT           &kp LCTRL          &kp LSHFT          U_NA                 U_EP_TOG             &kp C_PREV         &kp C_VOL_DN       &kp C_VOL_UP       &kp C_NEXT
 U_BOOT               U_NA               &kp RALT           &u_to_U_FUN        &u_to_U_MEDIA        U_NA                 &u_out_tog         &u_bt_sel_0        &u_bt_sel_1        &u_bt_sel_2        &u_bt_sel_3            U_RGB_BRI
                                         U_NA               U_NA               U_NA                 &kp C_STOP           &kp C_PP           &kp C_MUTE
@@ -246,45 +248,47 @@ U_BOOT               U_NA               &kp RALT           &u_to_U_FUN        &u
             >;
         };
 
-        // Sticky flag layer toggled with `&tog U_MAC` from the Media layer.
-        // Transparent on its own; activates the *_mac overlays via
-        // zmk,conditional-layers when combined with Button/Nav/Mouse.
-        mac {
-            display-name = "Mac";
+        // Sticky flag layer toggled with `&tog U_WIN` from the Media layer.
+        // Overrides the home-row pinky/middle mods to swap GUI<->CTRL for
+        // Windows orientation (CTRL on pinky, GUI on middle); activates
+        // the *_win overlays via zmk,conditional-layers when combined with
+        // Button/Nav/Mouse.
+        win {
+            display-name = "Win";
             bindings = <
 &trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans
-&trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans
+&u_mt LCTRL A        &trans             &u_mt LGUI D       &trans             &trans               &trans               &trans             &u_mt LGUI K       &trans             &u_mt LCTRL SQT
 &trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans             &trans                 &trans
                                         &trans             &trans             &trans               &trans               &trans             &trans
             >;
         };
 
-        button_mac {
-            display-name = "BtnMac";
+        button_win {
+            display-name = "BtnWin";
             bindings = <
-M_UND                M_CUT              M_CPY              M_PST              M_RDO                M_RDO                M_PST              M_CPY              M_CUT              M_UND
+W_UND                W_CUT              W_CPY              W_PST              W_RDO                W_RDO                W_PST              W_CPY              W_CUT              W_UND
 &trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans
-M_UND                M_UND              M_CUT              M_CPY              M_PST                M_RDO                M_RDO              M_PST              M_CPY              M_CUT              M_UND                  M_UND
+W_UND                W_UND              W_CUT              W_CPY              W_PST                W_RDO                W_RDO              W_PST              W_CPY              W_CUT              W_UND                  W_UND
                                         &trans             &trans             &trans               &trans               &trans             &trans
             >;
         };
 
-        nav_mac {
-            display-name = "NavMac";
+        nav_win {
+            display-name = "NavWin";
             bindings = <
-&trans               &trans             &trans             &trans             &trans               M_RDO                M_PST              M_CPY              M_CUT              M_UND
+&trans               &trans             &trans             &trans             &trans               W_RDO                W_PST              W_CPY              W_CUT              W_UND
 &trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans
-&trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans             &trans                 M_UND
+&trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans             &trans                 W_UND
                                         &trans             &trans             &trans               &trans               &trans             &trans
             >;
         };
 
-        mouse_mac {
-            display-name = "MseMac";
+        mouse_win {
+            display-name = "MseWin";
             bindings = <
-&trans               &trans             &trans             &trans             &trans               M_RDO                M_PST              M_CPY              M_CUT              M_UND
+&trans               &trans             &trans             &trans             &trans               W_RDO                W_PST              W_CPY              W_CUT              W_UND
 &trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans
-&trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans             &trans                 M_UND
+&trans               &trans             &trans             &trans             &trans               &trans               &trans             &trans             &trans             &trans             &trans                 W_UND
                                         &trans             &trans             &trans               &trans               &trans             &trans
             >;
         };
